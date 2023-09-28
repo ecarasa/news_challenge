@@ -12,14 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('reservations', function (Blueprint $table) {
-            $table->unsignedBigInteger('reservation_id');
-
             $table->string('id')->unique();
             $table->string('full_name');
             $table->string('email');
             $table->integer('number_of_guests');
             $table->enum('status', ['PAID', 'WITHDRAWN', 'EXPIRED', 'CANCELED', 'RETURNED']);
             $table->date('date');
+            $table->unsignedBigInteger('reservation_code');
             $table->decimal('amount', 8, 2)->default(220);
             $table->decimal('discount', 8, 2);
             $table->decimal('total_amount', 8, 2);

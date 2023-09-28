@@ -9,7 +9,8 @@ class Reservation extends Model
 {
     use HasFactory;
 
-    protected $primaryKey = 'reservation_id';
+    //protected $primaryKey = 'reservation_code';
+    public $incrementing = false; // por el id de tipo string
 
     protected $fillable = [
         'id',
@@ -17,7 +18,7 @@ class Reservation extends Model
         'email',
         'number_of_guests',
         'status',
-        'reservation_id',
+        'reservation_code',
         'date',
         'amount',
         'discount',

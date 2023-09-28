@@ -17,8 +17,8 @@
     <h2>Errores</h2>
     @foreach ($errors as $error)
     <p>
-        <!-- Fila: {{ implode(';', $error['row']) }}<br> -->
-        <!-- Mensajes: <br> -->
+        Fila: {{ implode(';', $error['row']) }}<br>
+        Mensajes: <br>
     <ul>
         @foreach ($error['messages']->all() as $message)
         <li>{{ $message }}</li>

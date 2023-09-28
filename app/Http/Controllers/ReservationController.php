@@ -22,7 +22,7 @@ class ReservationController extends Controller
             $reservations->where('email', 'like', '%' . $request->email . '%');
         }
 
-        $reservations = $reservations->get();
+        $reservations = $reservations->orderBy('created_at', 'desc')->get();
 
         return view('reservations.index', ['reservations' => $reservations]);
     }
@@ -38,8 +38,7 @@ class ReservationController extends Controller
 
         $header = explode($this->csv_delimiter, $data[0][0]);
 
-        unset($data[0]);
-
+        unset($data[0]); // quitamos la cabecera dle csv
 
         $customMessages = [
             'required' => 'El campo :attribute es obligatorio.',
@@ -65,45 +64,40 @@ class ReservationController extends Controller
             }
 
             $reservationData = array_combine([
-                'id', 'full_name', 'email', 'number_of_guests',
-                'status', 'reservation_id', 'date', 'amount',
-                'discount', 'total_amount', 'payment_type'
+                'id',
+                'full_name',
+                'email',
+                'number_of_guests',
+                'status',
+                'reservation_code',
+                'date',
+                'amount',
+                'discount',
+                'total_amount',
+                'payment_type'
             ], $rowArr);
-            //dd($reservationData);
 
             $validator = Validator::make($reservationData, [
-                /*        'id' => 'required|string',
+                'id' => 'required|string',
                 'full_name' => 'required|string',
                 'email' => 'required|email',
                 'number_of_guests' => 'required|integer|between:1,12',
-                'status' => 'required|in:Paid,Withdraw,Expired,Canceled',
-                'reservation_id' => 'required|integer',
+                'status' => 'required|in:PAID,WITHDRAWN,EXPIRED,CANCELED',
+                'reservation_code' => 'required|integer',
                 'date' => 'required|date',
                 'amount' => 'required|numeric',
                 'discount' => 'required|numeric',
-                'payment_type' => 'required|in:cash,credit card,online,debit card',*/
-                'id' => 'required',
-                'full_name' => 'required',
-                'email' => 'required',
-                'number_of_guests' => 'required',
-                'status' => 'required',
-                'reservation_id' => 'required',
-                'date' => 'required',
-                'amount' => 'required',
-                'discount' => 'required',
-                'payment_type' => 'required',
+                'payment_type' => 'required|in:Cash,Credit Card,Online,Debit Card',
             ], $customMessages);
 
 
             if ($validator->fails()) {
                 $errors[] = [
-                    'row' => $row,
+                    'row' => $rowArr,
                     'messages' => $validator->messages()
                 ];
             } else {
-
                 Reservation::updateOrCreate(
-
                     $reservationData
                 );
             }
@@ -112,9 +106,20 @@ class ReservationController extends Controller
         return view('reservations.upload')->with('errors', $errors);
     }
 
-
     public function uploadForm()
     {
         return view('reservations.upload');
+    }
+
+    public function edit($id)
+    {
+        $reservation = Reservation::findOrFail($id);
+
+        return view('reservations.edit_reservation', ['reservation' => $reservation]);
+    }
+
+    public function create()
+    {
+        return view('reservations.create_reservation');
     }
 }
