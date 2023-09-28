@@ -30,35 +30,27 @@ class ReservationController extends Controller
     public function storeCSV(Request $request)
     {
 
-        $request->validate(['csv_file' => 'required|mimes:csv,txt']);
-
+        $validatedData = $request->validate(['csv_file' => 'required|mimes:csv,txt']);
         $path = $request->file('csv_file')->getRealPath();
         $data = array_map('str_getcsv', file($path));
 
+        if (count($data) <= 1) {
+            return redirect()->back()->withErrors(['error_controller' => 'CSV is empty']);
+        }
 
         $header = explode($this->csv_delimiter, $data[0][0]);
-
-        unset($data[0]); // quitamos la cabecera dle csv
-
-        $customMessages = [
-            'required' => 'El campo :attribute es obligatorio.',
-            'email' => 'El formato del correo electrónico es inválido.',
-            'in' => 'El valor para :attribute no es válido.',
-            'between' => 'El número de invitados debe estar entre :min y :max.'
-        ];
+        unset($data[0]);
 
         $errors = [];
 
-        foreach ($data as $row) {
-
+        foreach ($data as $index => $row) {
             $rowArr = explode($this->csv_delimiter, $row[0]);
 
             if (count($rowArr) !== count($header)) {
-                echo "no coinciden las columnas";
-                $customError = new MessageBag(['file' => ['La fila no coincide con el formato del encabezado.']]);
                 $errors[] = [
+                    'line' => $index + 2,
                     'row' => $row,
-                    'messages' => $customError
+                    'messages' => ["the row doesnt' match"]
                 ];
                 continue;
             }
@@ -77,6 +69,7 @@ class ReservationController extends Controller
                 'payment_type'
             ], $rowArr);
 
+
             $validator = Validator::make($reservationData, [
                 'id' => 'required|string',
                 'full_name' => 'required|string',
@@ -88,22 +81,25 @@ class ReservationController extends Controller
                 'amount' => 'required|numeric',
                 'discount' => 'required|numeric',
                 'payment_type' => 'required|in:Cash,Credit Card,Online,Debit Card',
-            ], $customMessages);
+            ]);
 
 
             if ($validator->fails()) {
                 $errors[] = [
+                    'line' => $index + 2,
                     'row' => $rowArr,
-                    'messages' => $validator->messages()
+                    'messages' => $validator->messages()->all()
                 ];
             } else {
-                Reservation::updateOrCreate(
-                    $reservationData
-                );
+                Reservation::updateOrCreate($reservationData);
             }
         }
 
-        return view('reservations.upload')->with('errors', $errors);
+        if (!empty($errors)) {
+            return view('reservations.upload')->with('csvErrors', $errors);
+        }
+
+        return redirect()->route('reservations.index')->with('success', 'CSV imported succesfully.');
     }
 
     public function uploadForm()

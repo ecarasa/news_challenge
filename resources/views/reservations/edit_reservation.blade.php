@@ -4,8 +4,7 @@
 <head>
     <title>Edit Reservation</title>
     <link rel="stylesheet" href="{{ URL::asset('css/styles.css') }}">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Esto es lo esencial para diseño responsivo -->
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 
 <body>
@@ -27,7 +26,7 @@
 
         <div>
             <label for="number_of_guests">Number of Guests:</label>
-            <input type="number" name="number_of_guests" id="number_of_guests" min="1" max="12" required onchange="javascript:updateTotalAmount();" value="{{$reservation->number_of_guests}}">
+            <input type="number" name="number_of_guests" id="number_of_guests" min="1" max="12" required value="{{$reservation->number_of_guests}}">
         </div>
 
         <div>
@@ -42,18 +41,19 @@
 
         <div>
             <label for="amount">Amount:</label>
-            <input type="number" name="amount" id="amount" value="220" disabled value="{{$reservation->amount}}">
+            <input type="number" name="amount" id="amount" value="{{$reservation->amount}}">
         </div>
 
         <div>
             <label for="discount">Discount:</label>
-            <input type="number" name="discount" id="discount" required onchange="javascript:updateTotalAmount();" value="{{$reservation->discount}}">
+            <input type="number" name="discount" id="discount" required value="{{$reservation->discount}}">
         </div>
 
         <div>
             <label for="total_amount">Total Amount:</label>
             <input type="number" name="total_amount" id="total_amount" disabled value="{{$reservation->total_amount}}">
         </div>
+
         <div>
             <label for="status">Status</label>
             <select name="status" id="status" required>
@@ -90,10 +90,11 @@
 
         document.getElementById('number_of_guests').addEventListener('input', updateTotalAmount);
         document.getElementById('discount').addEventListener('input', updateTotalAmount);
+        document.getElementById('amount').addEventListener('input', updateTotalAmount);
 
         function updateTotalAmount() {
             const numberOfGuests = parseFloat(document.getElementById('number_of_guests').value) || 0;
-            const amount = 220;
+            const amount = parseFloat(document.getElementById('amount').value) || 0;
             const discount = parseFloat(document.getElementById('discount').value) || 0;
 
             const totalAmount = (numberOfGuests * amount) - discount;

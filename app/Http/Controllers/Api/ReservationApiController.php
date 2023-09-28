@@ -10,17 +10,7 @@ use Illuminate\Validation\ValidationException;
 class ReservationApiController extends Controller
 {
 
-    public $validationData = [
-        'full_name' => 'required|string|max:255',
-        'email' => 'required|email',
-        'number_of_guests' => 'required|integer|between:1,12',
-        'status' => 'required|in:PAID,WITHDRAWN,EXPIRED,CANCELED',
-        'reservation_code' => 'required|integer',
-        'date' => 'required|date',
-        //'amount' => 'required|numeric', -> disabled not traveling to the back and fixed price
-        'discount' => 'required|numeric',
-        'payment_type' => 'required|string|in:Cash,Credit Card,Online,Debit Card',
-    ];
+    public $fixedAmount = 220;
 
     private function generateReservationId()
     {
@@ -60,7 +50,6 @@ class ReservationApiController extends Controller
         return $query->get();
     }
 
-
     public function show(Reservation $reservation)
     {
         return $reservation;
@@ -69,17 +58,24 @@ class ReservationApiController extends Controller
     public function store(Request $request)
     {
         try {
-            $data = $request->validate($this->validationData);
+
+            $data = $request->validate([
+                'full_name' => 'required|string|max:255',
+                'email' => 'required|email',
+                'number_of_guests' => 'required|integer|between:1,12',
+                'status' => 'required|in:PAID,WITHDRAWN,EXPIRED,CANCELED',
+                'reservation_code' => 'required|integer',
+                'date' => 'required|date',
+                'discount' => 'required|numeric',
+                'payment_type' => 'required|string|in:Cash,Credit Card,Online,Debit Card',
+            ]);
+
+            $numberOfGuests = $request->input('number_of_guests', 0);
+            $discount = $request->input('discount', 0);
+            $data['total_amount'] = $this->calculateTotalAmount($numberOfGuests, $discount, $this->fixedAmount);
 
             // unique id creation and validation
             $data['id'] = $this->createUniqueReservationId();
-
-            // re calc totals, preventing not being modified in front
-            $numberOfGuests = $request->input('number_of_guests', 0);
-            $amount = 220;
-            $discount = $request->input('discount', 0);
-            $totalAmount = ($numberOfGuests * $amount) - $discount;
-            $data['total_amount'] = $totalAmount;
 
             $reservation = Reservation::create($data);
 
@@ -97,14 +93,42 @@ class ReservationApiController extends Controller
         return view('edit', ['reservation' => $reservation]);
     }
 
+    private function calculateTotalAmount($numberOfGuests, $discount, $amount)
+    {
+        return ($numberOfGuests * $amount) - $discount;
+    }
+
     public function update(Request $request, Reservation $reservation)
     {
+        try {
 
-        $data = $request->validate([]);
+            $data = $request->validate([
+                'full_name' => 'required|string|max:255',
+                'email' => 'required|email',
+                'number_of_guests' => 'required|integer|between:1,12',
+                'status' => 'required|in:PAID,WITHDRAWN,EXPIRED,CANCELED',
+                'reservation_code' => 'required|integer',
+                'date' => 'required|date',
+                'discount' => 'required|numeric',
+                'amount' => 'required|numeric',
+                'payment_type' => 'required|string|in:Cash,Credit Card,Online,Debit Card',
+            ]);
 
-        $reservation->update($data);
+            $numberOfGuests = $request->input('number_of_guests', 0);
+            $discount = $request->input('discount', 0);
+            $amount = $request->input('amount', $this->fixedAmount);
 
-        return response()->json($reservation);
+            $data['total_amount'] = $this->calculateTotalAmount($numberOfGuests, $discount, $amount);
+
+            $reservation->update($data);
+
+            return response()->json($reservation);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation Error',
+                'errors' => $e->errors()
+            ], 422);
+        }
     }
 
     public function destroy(Reservation $reservation)

@@ -75,7 +75,14 @@ background-color: #b9b9b9;
 .btndefault:hover{
 background-color: #515151;
 }
+.err_csv{
 
+}
+.err_list{
+    display: flex;
+    width: 80%;
+    margin: auto;
+}
 .err-alert {
     list-style: none;
     padding: 0;
@@ -86,7 +93,10 @@ background-color: #515151;
 }
 
 .alert_danger_card{
-    margin-bottom: 20px;margin-top: 20px; background-color: #842029; border: 1px solid #f5c2c7; color: white; padding: 15px; border-radius: 5px;
+    margin-bottom: 20px; margin-top: 20px; background-color: #842029; border: 1px solid #f5c2c7; color: white; padding: 15px; border-radius: 5px;
+}
+.alert_success_card{
+    margin-bottom: 20px; margin-top: 20px; background-color: #d4edda; border: 1px solid #c3e6cb; color: #155724; padding: 15px; border-radius: 5px;
 }
 
 .err-alert li {

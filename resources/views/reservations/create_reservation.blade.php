@@ -4,7 +4,7 @@
 <head>
     <title>Create Reservation</title>
     <link rel="stylesheet" href="{{ URL::asset('css/styles.css') }}">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Esto es lo esencial para diseño responsivo -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 </head>
 
@@ -120,7 +120,7 @@
                     return response.json();
                 })
                 .then(data => {
-                    alertContainerElement.innerHTML = `<div style="margin-top: 20px; background-color: #d4edda; border: 1px solid #c3e6cb; color: #155724; padding: 15px; border-radius: 5px;">Reservation created successfully for ${data.full_name} with ID: ${data.id}. <a href="{{route('reservations.index')}}">Back to List of Reservations</a></div>`;
+                    alertContainerElement.innerHTML = `<div class="alert_success_card">Reservation created successfully for ${data.full_name} with ID: ${data.id}. <a href="{{route('reservations.index')}}">Back to List of Reservations</a></div>`;
                 })
                 .catch(error => {
                     if (error.errors) {

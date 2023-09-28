@@ -3,7 +3,7 @@
 
 <head>
     <title>Reservations</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Esto es lo esencial para diseño responsivo -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ URL::asset('css/styles.css') }}">
 </head>
 
@@ -14,10 +14,16 @@
     <div class="search_container">
         <input type="text" id="emailSearch" placeholder="search by email">
         <button onclick="performSearch()">Buscar</button>
-        <a href="{{route('reservations.create')}}" class="btn">Create New</a>
+        <a href="{{route('reservations.create')}}" class="btn">New</a>
+        <a href="{{route('store.csv')}}" class="btn btndefault">Upload</a>
     </div>
 
     <div id="ajax_result"></div>
+    @if (session('success'))
+    <div class="alert_success_card">
+        {{ session('success') }}
+    </div>
+    @endif
 
     <table border="1" id="reservationsTable">
         <thead>
